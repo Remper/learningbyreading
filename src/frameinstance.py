@@ -1,6 +1,8 @@
+import time
 from lxml import etree, objectify
 from unboxer import unboxer, drg
 import re
+import logging as log
 from framenet import frames, vn2fn_roles
 from candc import get_drg
 import logging as log
@@ -49,8 +51,9 @@ def get_frame_instances(variables, semantics, thematic_roles):
                                     role = "vn-{0}".format(relation['symbol'])
                                 frame_instances[instance_id]['roles'][role] = (relation['arg2'], filler)
 
-
     elif config.get('semantics', 'module') == 'semafor':
+        counter = 0
+        timestamp = time.time()
         for variable, frame in semantics['frames'].iteritems():
             # create new frame instance
             instance_id = "{0}_{1}".format(frame, uuid4())
@@ -64,11 +67,18 @@ def get_frame_instances(variables, semantics, thematic_roles):
                     #print relation, variables[relation['arg2']]
                     for filler in variables[relation['arg2']]:
                         frame_instances[instance_id]['roles'][relation['symbol']] = (relation['arg2'], filler)
+            counter += 1
+            if counter % 1000 == 0:
+                log.info("Processed %.2fk frames (%.2fs)" % (float(counter)/1000, time.time() - timestamp))
+        log.info("Processed %d frames (%.2fs)" % (counter, time.time() - timestamp))
 
     return frame_instances
 
+
 def get_frame_triples(frame_instances):
     triples = []
+    counter = 0
+    timestamp = time.time()
     for frame_instance_id, frame_instance in frame_instances.iteritems():
         if len(frame_instance['roles']) > 0:
             framebase_id = frame_instance['frame']
@@ -90,17 +100,22 @@ def get_frame_triples(frame_instances):
                           '<{0}/fe-{1}>'.format(config.get('namespace', 'frame'), role),
                           '<{0}>'.format(filler.encode('utf-8')))
                 triples.append(triple)
+        counter += 1
+        if counter % 10000 == 0:
+            log.info("Processed %.2fk out of %d (%.2fs)" % (float(counter)/1000, len(frame_instances), time.time() - timestamp))
+    log.info("Processed %d out of %d (%.2fs)" % (counter, len(frame_instances), time.time() - timestamp))
     return triples
+
 
 def get_aligned_frames_xml(tokenized, frame_instances, root):
     # read DRG
-    tuples = get_drg(tokenized)
+    tuples = get_drg(tokenized.encode('utf-8'))
     drgparser = drg.DRGParser()
     d = drgparser.parse_tup_lines(tuples)
 
     for instance_id, frame_instance in frame_instances.iteritems():
         if len(frame_instance['roles']) > 0:
-            if frame_instance['frame'] != "Unmapped":
+            if frame_instance['frame'] != "Unmapped" and frame_instance['synset'] in mapping_net:
                 framebase_id = "{0}-{1}".format(frame_instance['frame'], mapping_net[frame_instance['synset']].split("#")[0].replace('-', '.'))
             else:
                 log.info('No mapping found for synset {0}'.format(frame_instance['synset']))

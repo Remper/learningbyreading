@@ -152,11 +152,14 @@ for filename in documents:
     # extract frame instances.
     # this is the core algorithm of KNEWS,
     # the alignment between the semantic parsing and the word sense disambiguation module
+    log.info("Getting frame instances")
     frame_instances = get_frame_instances(variables, semantics, thematic_roles)
+    log.info("Producing frame triples")
     frame_instance_triples.extend(get_frame_triples(frame_instances))
 
     # use DRG to get aligned frame instances
     if output_format == 'xml':
+        log.info("Aligning frames")
         aligned_frames_xml = get_aligned_frames_xml(tokenized, frame_instances, root)
 
 
