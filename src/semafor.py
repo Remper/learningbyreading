@@ -63,12 +63,12 @@ def semafor_local(text):
     input_file = join(dirname(__file__),'../{0}/bin/in.txt'.format(config.get('semafor', 'base_dir')))
     with open(input_file, 'w') as f:
         tokenizer = PunktSentenceTokenizer()
-        sentences = tokenizer.tokenize(text)
-        f.write('\n'.join(sentences))
+        sentences = tokenizer.tokenize(text.decode('utf-8'))
+        f.write('\n'.join(map(lambda x: x.encode('utf-8'), sentences)))
     output_file = join(dirname(__file__),'../{0}/bin/out.txt'.format(config.get('semafor', 'base_dir')))
     if isfile(output_file):
         remove(output_file)
-    process = subprocess.Popen([semafor, input_file, output_file, '1'],
+    process = subprocess.Popen([semafor, input_file, output_file, '8'],
                            shell=False)
     out, err = process.communicate(text)
     if err:
