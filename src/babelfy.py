@@ -9,17 +9,21 @@ with open(join(dirname(__file__),'../config/babelfy.var.properties')) as f:
     babelnet_key = f.readlines()[0][:-1].split('=')[1]
     
 def babelfy(text):
+    err = None
     try:
-        libs = [join(dirname(__file__),'../libs/babelfy-aloof/babelfy-aloof.jar'),join(dirname(__file__),'../libs/babelfy-aloof/libs/*'), join(dirname(__file__),'../config')]
-        local_libs = map(lambda x: join(dirname(__file__),'../'+x), libs)
-        local_libs = libs
+        libs = ['../libs/babelfy-aloof/babelfy-aloof.jar', '../libs/babelfy-aloof/libs/*', '../config']
+        local_libs = map(lambda x: join(dirname(__file__), x), libs)
+
+        text = text.encode('utf-8')
         process = subprocess.Popen(["java", "-cp", ":".join(local_libs), "BabelfyAloof", text],
                                shell=False,
                                stdin=subprocess.PIPE,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
         out, err = process.communicate(text)
-    except:
+    except Exception as e:
+        if err is None:
+            err = str(e)
         log.error("babelfy(): error executing Babelfy Java API:\n{0}".format(err))
         return None
 

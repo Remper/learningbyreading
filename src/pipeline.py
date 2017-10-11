@@ -81,7 +81,7 @@ root = objectify.Element("frameinstances")
 for filename in documents:
     # read file
     log.info("opening file {0}".format(filename))
-    with open(filename) as f:
+    with open(filename, 'r') as f:
         text = f.read()
 
     # semantic parsing
