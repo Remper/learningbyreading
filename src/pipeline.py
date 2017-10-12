@@ -76,9 +76,10 @@ else:
 
 
 triples = list()
-frame_instance_triples = list()
 root = objectify.Element("frameinstances")
 for filename in documents:
+    frame_instance_triples = list()
+
     # read file
     log.info("opening file {0}".format(filename))
     with open(filename, 'r') as f:
@@ -162,11 +163,10 @@ for filename in documents:
         log.info("Aligning frames")
         aligned_frames_xml = get_aligned_frames_xml(tokenized, frame_instances, root)
 
-
-log.info('writing output ({0}) on file {1}...'.format(output_format, options.output_file))
-with open(output_file, "w") as f:
-    if output_format == 'triples':
-        for triple in frame_instance_triples:
-            f.write("{0} {1} {2} .\n".format(*triple))
-    elif output_format == 'xml':
-        f.write(aligned_frames_xml)
+    log.info('writing output ({0}) on file {1}...'.format(output_format, options.output_file))
+    with open(output_file, "a") as f:
+        if output_format == 'triples':
+            for triple in frame_instance_triples:
+                f.write("{0} {1} {2} .\n".format(*triple))
+        elif output_format == 'xml':
+            f.write(aligned_frames_xml)

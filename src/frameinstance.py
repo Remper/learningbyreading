@@ -69,7 +69,7 @@ def get_frame_instances(variables, semantics, thematic_roles):
                         frame_instances[instance_id]['roles'][relation['symbol']] = (relation['arg2'], filler)
             counter += 1
             if counter % 1000 == 0:
-                log.info("Processed %.2fk frames (%.2fs)" % (float(counter)/1000, time.time() - timestamp))
+                log.info("Processed %fk frames (%.2fs)" % (float(counter)/1000, time.time() - timestamp))
         log.info("Processed %d frames (%.2fs)" % (counter, time.time() - timestamp))
 
     return frame_instances
@@ -102,7 +102,7 @@ def get_frame_triples(frame_instances):
                 triples.append(triple)
         counter += 1
         if counter % 10000 == 0:
-            log.info("Processed %.2fk out of %d (%.2fs)" % (float(counter)/1000, len(frame_instances), time.time() - timestamp))
+            log.info("Processed %fk out of %d (%.2fs)" % (float(counter)/1000, len(frame_instances), time.time() - timestamp))
     log.info("Processed %d out of %d (%.2fs)" % (counter, len(frame_instances), time.time() - timestamp))
     return triples
 
